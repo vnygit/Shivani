@@ -1,0 +1,155 @@
+9.1)
+a)
+set serveroutput on
+declare
+a number(10);
+v_empno emp1.empno%type;
+begin
+v_empno:=&v_empno;
+select to_number(ename) into a from emp1 where empno=v_empno;
+exception
+when INVALID_NUMBER then
+dbms_output.put_line('ename cannot be converted to number');
+end;
+/
+
+output:
+
+Enter value for v_empno: 101
+old   5: v_empno:=&v_empno;
+new   5: v_empno:=101;
+ename cannot be converted to number
+
+PL/SQL procedure successfully completed.
+
+b)
+
+set serveroutput on
+declare
+v_ename emp1.ename%type;
+v_empno emp1.empno%type;
+begin
+v_empno:=&v_empno;
+select ename into v_ename from emp1 where empno=v_empno;
+dbms_output.put_line('ename:'|| v_ename);
+exception
+when NO_DATA_FOUND then
+dbms_output.put_line('ename does not exist');
+end;
+/
+
+output:
+
+Enter value for v_empno: 180
+old   5: v_empno:=&v_empno;
+new   5: v_empno:=180;
+ename does not exist
+
+PL/SQL procedure successfully completed.
+
+c)
+
+set serveroutput on
+declare
+v_ename emp1.ename%type;
+v_deptno dept1.dno1%TYPE;
+begin
+v_deptno:='&v_deptno';
+select ename into v_ename from emp1 where deptno=v_deptno;
+dbms_output.put_line('ename:'|| v_ename);
+exception
+when TOO_MANY_ROWS then
+dbms_output.put_line('Returning more than one record');
+end;
+/
+
+output:
+
+Enter value for v_deptno: D1
+old   5: v_deptno:='&v_deptno';
+new   5: v_deptno:='D1';
+Returning more than one record
+
+PL/SQL procedure successfully completed.
+
+9.2)
+
+set serveroutput on
+declare
+v_principal number(10);
+v_ri number(5);
+v_year number(4);
+error_low exception;
+begin
+v_principal:=&v_principal;
+v_ri:=&v_ri;
+v_year:=&v_year;
+if v_principal <=1000 or v_ri <5 or v_year <1 then
+Raise error_low;
+end if;
+exception
+when error_low then
+dbms_output.put_line('Principal amount should be greater than 1000,Rate of Interest should 
+be greater than 5 and year should to greater then one.');
+end;
+/
+
+output:
+
+Enter value for v_principal: 999
+old   7: v_principal:=&v_principal;
+new   7: v_principal:=999;
+Enter value for v_ri: 4
+old   8: v_ri:=&v_ri;
+new   8: v_ri:=4;
+Enter value for v_year: 1
+old   9: v_year:=&v_year;
+new   9: v_year:=1;
+Principal amount should be greater than 1000,Rate of Interest should
+be greater
+than 5 and year should to greater then one.
+
+PL/SQL procedure successfully completed.
+
+9.3)
+
+SET SERVEROUTPUT ON
+DECLARE
+CURSOR emp_cur(eno emp1.empno%type) Is
+SELECT * from emp1 where empno=eno;
+gt_25k EXCEPTION;
+no_data_found EXCEPTION;
+BEGIN
+for i in emp_cur(&eno)
+LOOP
+if emp_cur%notfound
+then
+raise no_data_found;
+else
+DBMS_OUTPUT.PUT_LINE('Empno:'||i.empno||' Name:'||i.ename||' salary:'||i.sal);
+IF i.sal>25000 THEN
+RAISE gt_25k;
+ELSE
+update emp1 set sal=25000 where empno=i.empno;
+DBMS_OUTPUT.PUT_LINE('Employee salary is less than 25000 and table updated');
+end if;
+end if;
+end loop;
+EXCEPTION
+WHEN gt_25k THEN
+DBMS_OUTPUT.PUT_LINE('Employee salary is greater than 25000');
+WHEN no_data_found THEN
+DBMS_OUTPUT.PUT_LINE('Entered empno is not existing in table');
+END;
+/
+
+output:
+
+Enter value for eno: 101
+old   7: for i in emp_cur(&eno)
+new   7: for i in emp_cur(101)
+Empno:101 Name:Ravi salary:32000
+Employee salary is greater than 25000
+
+PL/SQL procedure successfully completed.
+

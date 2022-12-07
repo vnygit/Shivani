@@ -1,0 +1,118 @@
+10.1)
+
+create table sal_mod(
+emp_no number(4),
+dname varchar2(20),
+old_sal number(11,2),
+mod_date date,
+modifier varchar(20)
+);
+
+Table created.
+
+set serveroutput on;
+create or replace trigger sal_up after update of sal on emp1
+for each row
+declare
+dept_name dept1.dname1%type;
+begin
+select dname1 into dept_name from dept1 where dno1=:old.deptno;
+if updating ('sal') then
+dbms_output.put_line('Emp no = ' || :old.empno || '-- Old salary = ' || :old.sal || '-- New salary = '
+|| :new.sal || ' Department = ' || dept_name);
+insert into sal_mod values(:old.empno,dept_name,:old.sal,sysdate,user);
+end if;
+end;
+/
+
+
+output:
+
+update emp1 set sal = 55000 where empno = 125;
+Emp no = 125-- Old salary = 22000-- New salary = 55000 Department = HR
+
+1 row updated.
+
+SQL> select *from sal_mod;
+
+    EMP_NO DNAME                   OLD_SAL MOD_DATE  MODIFIER
+---------- -------------------- ---------- --------- --------------------
+       125 HR                        22000 06-DEC-22 MCA067
+
+
+10.2)
+
+
+set serveroutput on;
+create or replace trigger trig1 after update on project1 
+for each row
+declare
+	proj_duration number(10);
+	lapsed_duration number(10);
+	fund number(10);
+begin
+	proj_duration :=:old.end_date - :old.strt_date;
+	lapsed_duration:=sysdate - :old.strt_date;
+	if lapsed_duration < (0.5 * proj_duration) then
+		fund := (:new.prj_fund -:old.prj_fund ) * 0.7;
+		dbms_output.put_line('you are eligible for Rs.' || fund );
+	else
+		fund := (:new.prj_fund -:old.prj_fund ) * 0.4;
+		dbms_output.put_line('you are eligible for Rs.' || fund );
+	end if;
+end;
+/
+
+output:
+
+SQL> update project1 set prj_fund = prj_fund + 150000 where dno='D2';
+you are eligible for Rs.60000
+
+1 row updated.
+
+
+10.3)
+
+SET SERVEROUTPUT ON
+CREATE OR REPLACE TRIGGER tr_holiday_no_work
+BEFORE INSERT OR UPDATE OF sal OR DELETE
+ON emp1
+FOR EACH ROW
+BEGIN
+IF TO_CHAR(SYSDATE,'DY') = 'TUE' OR TO_CHAR(SYSDATE,'DY') = 'SAT' THEN
+RAISE_APPLICATION_ERROR(-20111 ,'No changes can be made on Saturday/Sunday');
+END IF;
+END;
+/
+
+output:
+
+Trigger created.
+
+SQL> update emp1 set sal=50000 where empno=101;
+Emp no = 101-- Old salary = 32000-- New salary = 50000 Department = Marketing
+
+1 row updated.
+
+SQL> SET SERVEROUTPUT ON
+SQL> CREATE OR REPLACE TRIGGER tr_holiday_no_work
+  2  BEFORE INSERT OR UPDATE OF sal OR DELETE
+  3  ON emp1
+  4  FOR EACH ROW
+  5  BEGIN
+  6  IF TO_CHAR(SYSDATE,'DY') = 'TUE' OR TO_CHAR(SYSDATE,'DY') = 'SAT' THEN
+  7  RAISE_APPLICATION_ERROR(-20111 ,'No changes can be made on Saturday/Sunday');
+  8  END IF;
+  9  END;
+ 10  /
+
+Trigger created.
+
+SQL> update emp1 set sal=50000 where empno=101;
+update emp1 set sal=50000 where empno=101
+       *
+ERROR at line 1:
+ORA-20111: No changes can be made on Saturday/Sunday
+ORA-06512: at "MCA067.TR_HOLIDAY_NO_WORK", line 3
+ORA-04088: error during execution of trigger 'MCA067.TR_HOLIDAY_NO_WORK'
+

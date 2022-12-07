@@ -1,0 +1,112 @@
+8.1)
+
+SET SERVEROUTPUT ON
+DECLARE
+	emp_record  emp1%ROWTYPE;
+        CURSOR emp_test (new_sal NUMBER) IS
+        SELECT * FROM emp1 WHERE sal > new_sal;
+BEGIN
+	OPEN emp_test(30000);
+        LOOP
+        	FETCH emp_test INTO emp_record;
+        	EXIT WHEN emp_test%NOTFOUND;
+        	DBMS_OUTPUT.PUT_LINE('Name: ' || emp_record.ename ||','||' salary: '
+                || emp_record.sal);
+        END LOOP;
+        CLOSE emp_test;
+END;
+/
+
+output:
+
+Name: Raghu , salary: 45000
+Name: Rajesh , salary: 60000
+Name: Ganesh , salary: 33000
+Name: Joel , salary: 41000
+Name: Mukesh , salary: 44000
+
+PL/SQL procedure successfully completed.
+
+8.2)
+
+set serveroutput on;
+declare
+	cursor cur is select DNO,PRJ_NO,PRJ_CREDIT,PRJ_FUND from project1;
+	alloc number;
+	alloc_per_emp number;
+	cont number;
+begin
+	for i in cur
+	loop
+		alloc :=(i.PRJ_CREDIT*10/100)*i.PRJ_FUND;
+		update DEPT1 set Dept_Budget=Dept_Budget + ((30/100)*alloc) where DNO1=i.DNO;
+		alloc_per_emp :=(70/100)*alloc;
+		select count(*) into cont from EMP1 where PRJ_ID = i.PRJ_NO and DEPTNO=i.DNO;
+		update EMP1 set SAL=SAL+(alloc_per_emp/cont) where PRJ_ID=i.PRJ_NO and DEPTNO =i.DNO;
+	end loop;
+end;
+/
+
+
+8.3)
+
+SET SERVEROUTPUT ON
+DECLARE
+
+	CURSOR emp_test(new_job varchar2,new_dptno varchar2) IS
+	select ename,job,deptno from emp1 where job=new_job AND deptno=new_dptno;
+	ename1 emp1.Ename%TYPE;
+	job1 emp1.JOB%TYPE;
+	deptno1 emp1.DEPTNO%TYPE;	
+BEGIN
+OPEN emp_test('&new_job','&new_dptno');
+LOOP
+	FETCH emp_test INTO ename1,job1,deptno1;
+	EXIT WHEN emp_test%NOTFOUND;
+	DBMS_OUTPUT.PUT_LINE('Name: ' || ename1 ||',''JOB: ' || job1 ||','||' DEPTNO: '
+	|| deptno1);
+END LOOP;
+CLOSE emp_test;
+END;
+/
+
+output:
+
+Enter value for new_job: CLRK
+Enter value for new_dptno: D1
+old   9: OPEN emp_test('&new_job','&new_dptno');
+new   9: OPEN emp_test('CLRK','D1');
+Name: Ganesh,'JOB: CLRK, DEPTNO: D1
+Name: Mukesh,'JOB: CLRK, DEPTNO: D1
+Name: Raviraj,'JOB: CLRK, DEPTNO: D1
+Name: Suresh,'JOB: CLRK, DEPTNO: D1
+
+PL/SQL procedure successfully completed.
+
+8.4)
+
+SET SERVEROUTPUT ON
+DECLARE
+eprj EMP1.PRJ_ID%type;
+eename EMP1.ENAME%type;
+esal EMP1.SAL%type;
+edname DEPT1.DNAME1%type;
+edno DEPT1.DNO1%type;
+cursor ee_cur(eprj varchar) is select ENAME,SAL,DNAME1 from EMP1,DEPT1 where DEPTNO=DNO1 and PRJ_ID=eprj order by SAL desc fetch first 2 rows only;
+BEGIN
+for i in ee_cur('&eprj')
+loop
+dbms_output.put_line(' Name :' || i.ENAME || ' , Salary :' || i.SAL || ' and Department:' ||i.DNAME1);
+END LOOP;
+END;
+/
+
+output:
+
+Enter value for eprj: P1
+old   9: for i in ee_cur('&eprj')
+new   9: for i in ee_cur('P1')
+Name :Ravi , Salary :55600 and Department:Marketing
+Name :Joel , Salary :52900 and Department:Research
+
+PL/SQL procedure successfully completed.
